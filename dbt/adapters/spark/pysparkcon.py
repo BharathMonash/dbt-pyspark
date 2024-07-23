@@ -9,18 +9,8 @@ from dbt.events import AdapterLogger
 from dbt.utils import DECIMALS
 from dbt_common.exceptions import DbtDatabaseError
 
-# from dbt_common.exceptions import DbtConfigError, DbtRuntimeError
-
-
-# from pyspark.rdd import _load_from_socket
 from pyspark.sql import SparkSession
 
-# import pyspark.sql.functions as F
-
-# import importlib
-
-# import sqlalchemy
-# import re
 
 logger = AdapterLogger("Spark")
 NUMBERS = DECIMALS + (int, float)
@@ -58,15 +48,6 @@ class PysparkConnectionWrapper(object):
 
     def rollback(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
         logger.debug("NotImplemented: rollback")
-
-    # def fetchall(self) -> Any:
-    #     try:
-    #         rows = self.result.collect()
-    #         logger.debug(rows)
-    #     except Exception as e:
-    #         logger.debug(f"raising error {e}")
-    #         raise DbtDatabaseError(e)
-    #     return rows
 
     def execute(self, sql, bindings=None):  # type: ignore[no-untyped-def]
         if sql.strip().endswith(";"):
