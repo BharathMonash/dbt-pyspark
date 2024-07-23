@@ -44,13 +44,14 @@ package_name = "dbt-spark"
 package_version = "1.9.0a1"
 description = """The Apache Spark adapter plugin for dbt"""
 
-odbc_extras = ["pyodbc~=4.0.39"]
+odbc_extras = ["pyodbc>=5.1.0"]
 pyhive_extras = [
     "PyHive[hive_pure_sasl]~=0.7.0",
     "thrift>=0.11.0,<0.17.0",
 ]
 session_extras = ["pyspark>=3.0.0,<4.0.0"]
-all_extras = odbc_extras + pyhive_extras + session_extras
+pyspark_extras = ["pyspark>=3.0.0,<4.0.0"]
+all_extras = odbc_extras + pyhive_extras + session_extras + pyspark_extras
 
 setup(
     name=package_name,
@@ -74,6 +75,7 @@ setup(
         "ODBC": odbc_extras,
         "PyHive": pyhive_extras,
         "session": session_extras,
+        "pyspark": pyspark_extras,
         "all": all_extras,
     },
     zip_safe=False,
