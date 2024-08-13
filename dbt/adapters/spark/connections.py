@@ -46,6 +46,18 @@ except ImportError:
 import base64
 import time
 
+try:
+    from pyspark.rdd import _load_from_socket
+    import pyspark.sql.functions as F
+    from pyspark.sql import SparkSession
+except ImportError:
+    SparkSession = None
+    _load_from_socket = None
+    F = None
+
+import importlib
+from .pysparkcon import PysparkConnectionWrapper
+
 logger = AdapterLogger("Spark")
 
 NUMBERS = DECIMALS + (int, float)
@@ -60,6 +72,7 @@ class SparkConnectionMethod(StrEnum):
     HTTP = "http"
     ODBC = "odbc"
     SESSION = "session"
+    PYSPARK = "pyspark"
 
 
 @dataclass
@@ -83,6 +96,7 @@ class SparkCredentials(Credentials):
     use_ssl: bool = False
     server_side_parameters: Dict[str, str] = field(default_factory=dict)
     retry_all: bool = False
+    python_module: Optional[str] = None
 
     @classmethod
     def __pre_deserialize__(cls, data: Any) -> Any:
@@ -102,6 +116,22 @@ class SparkCredentials(Credentials):
             raise DbtRuntimeError("Must specify `host` in profile")
         if self.schema is None:
             raise DbtRuntimeError("Must specify `schema` in profile")
+        if (self.method == SparkConnectionMethod.PYSPARK) and not (
+            _load_from_socket and SparkSession and F
+        ):
+            raise DbtRuntimeError(
+                f"{self.method} connection method requires "
+                "additional dependencies. \n"
+                "Install the additional required dependencies with "
+                "`pip install pyspark`"
+            )
+        else:
+            path = self.python_module
+            logger.debug(f"SparkCredentials attempting to load spark context from {path}")
+            module = importlib.import_module(path)  # type: ignore[arg-type]
+            create_spark_context = getattr(module, "create_spark_context")
+            create_spark_context()
+            return
 
         # spark classifies database and schema as the same thing
         if self.database is not None and self.database != self.schema:
@@ -410,7 +440,9 @@ class SparkConnectionManager(SQLConnectionManager):
 
         for i in range(1 + creds.connect_retries):
             try:
-                if creds.method == SparkConnectionMethod.HTTP:
+                if creds.method == SparkConnectionMethod.PYSPARK:
+                    handle = PysparkConnectionWrapper()  # type: ignore[assignment]
+                elif creds.method == SparkConnectionMethod.HTTP:
                     cls.validate_creds(creds, ["token", "host", "port", "cluster", "organization"])
 
                     # Prepend https:// if it is missing
