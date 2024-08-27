@@ -5,8 +5,8 @@ from datetime import datetime
 # from types import TracebackType
 from typing import Any
 
-from dbt.events import AdapterLogger
-from dbt.utils import DECIMALS
+from dbt.adapters.events.logging import AdapterLogger
+from dbt_common.utils.encoding import DECIMALS
 from dbt_common.exceptions import DbtDatabaseError
 
 from pyspark.sql import SparkSession

@@ -40,9 +40,9 @@ def _get_plugin_version_dict():
         return match.groupdict()
 
 
-package_name = "dbt-spark"
-package_version = "1.9.0a1"
-description = """The Apache Spark adapter plugin for dbt"""
+package_name = "dbt-pyspark"
+package_version = "1.0.1"
+description = """The Apache PySpark adapter plugin for dbt"""
 
 odbc_extras = ["pyodbc>=4.0.39"]
 pyhive_extras = [
@@ -59,9 +59,9 @@ setup(
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="dbt Labs",
+    author="dbt Labs & Bharath Krish",
     author_email="info@dbtlabs.com",
-    url="https://github.com/dbt-labs/dbt-spark",
+    url="https://github.com/BharathMonash/dbt-pyspark",
     packages=find_namespace_packages(include=["dbt", "dbt.*"]),
     include_package_data=True,
     install_requires=[
